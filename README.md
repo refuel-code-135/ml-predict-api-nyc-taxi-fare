@@ -6,6 +6,12 @@ A FastAPI-based machine learning inference API that predicts New York City taxi 
 The model was trained using LightGBM and deployed in a Dockerized environment with Nginx as a reverse proxy.
 
 
+This API's model is created by LightGBM.
+The notebook that creates the model is here:
+
+https://github.com/refuel-code-135/ml-supervised-regression-nyc-taxi-fare
+
+
 ## Usage
 
 ```bash
