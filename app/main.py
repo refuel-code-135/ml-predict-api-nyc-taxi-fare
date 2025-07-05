@@ -1,12 +1,14 @@
 import os
+from datetime import datetime
 
 import joblib
 import lightgbm as lgb
-from fastapi import FastAPI
+import numpy as np
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
 
 app = FastAPI()
 
-# グローバル変数としてモデルとクラスタ保持
 model = None
 pickup_kmeans = None
 dropoff_kmeans = None
@@ -24,13 +26,6 @@ def load_model_and_clusters():
     pickup_kmeans = joblib.load(pickup_cluster_path)
     dropoff_kmeans = joblib.load(dropoff_cluster_path)
 
-    print("✅ モデルとクラスタファイルをロードしました")
-
-
-from datetime import datetime
-
-import numpy as np
-
 
 def haversine_distance(lat1, lon1, lat2, lon2):
     R = 6371  # 地球半径 (km)
@@ -42,7 +37,7 @@ def haversine_distance(lat1, lon1, lat2, lon2):
     return R * c
 
 
-# ニューヨークの主要ランドマークの座標
+# longitude,latitude
 landmarks = {
     "JFK": (40.6413, -73.7781),
     "LGA": (40.7769, -73.8740),
@@ -143,10 +138,6 @@ def generate_features(data: dict):
     return feature_vector
 
 
-from fastapi import HTTPException
-from pydantic import BaseModel
-
-
 class TaxiFareRequest(BaseModel):
     pickup_datetime: str
     pickup_latitude: float
@@ -159,7 +150,7 @@ class TaxiFareRequest(BaseModel):
 @app.post("/predict")
 def predict_fare(request: TaxiFareRequest):
     if model is None:
-        raise HTTPException(status_code=500, detail="モデルが読み込まれていません")
+        raise HTTPException(status_code=500, detail="Model Loading Error")
 
     try:
         features = generate_features(request.dict())
