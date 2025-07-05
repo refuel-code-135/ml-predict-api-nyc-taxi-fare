@@ -19,7 +19,7 @@ docker compose up --build
 curl -X POST http://localhost:9700/predict \
   -H "Content-Type: application/json" \
   -d '{
-    "pickup_datetime": "2023-07-05T14:30:00",
+    "pickup_datetime": "2025-08-01T14:30:00",
     "pickup_latitude": 40.7128,
     "pickup_longitude": -74.0060,
     "dropoff_latitude": 40.730610,
@@ -31,7 +31,7 @@ curl -X POST http://localhost:9700/predict \
 ```bash
 # Response
 {
-  "predicted_fare": 3.14
+  "predicted_fare": 3.13
 }
 ```
 
