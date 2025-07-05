@@ -1,7 +1,8 @@
-from fastapi import FastAPI
-import lightgbm as lgb
-import joblib
 import os
+
+import joblib
+import lightgbm as lgb
+from fastapi import FastAPI
 
 app = FastAPI()
 
@@ -27,6 +28,7 @@ def load_model_and_clusters():
 
 
 from datetime import datetime
+
 import numpy as np
 
 
@@ -62,16 +64,22 @@ def generate_features(data: dict):
     delta_lon = abs(data["pickup_longitude"] - data["dropoff_longitude"])
 
     distance_km = haversine_distance(
-        data["pickup_latitude"], data["pickup_longitude"],
-        data["dropoff_latitude"], data["dropoff_longitude"]
+        data["pickup_latitude"],
+        data["pickup_longitude"],
+        data["dropoff_latitude"],
+        data["dropoff_longitude"],
     )
 
     manhattan_km = haversine_distance(
-        data["pickup_latitude"], data["pickup_longitude"],
-        data["pickup_latitude"], data["dropoff_longitude"]
+        data["pickup_latitude"],
+        data["pickup_longitude"],
+        data["pickup_latitude"],
+        data["dropoff_longitude"],
     ) + haversine_distance(
-        data["pickup_latitude"], data["dropoff_longitude"],
-        data["dropoff_latitude"], data["dropoff_longitude"]
+        data["pickup_latitude"],
+        data["dropoff_longitude"],
+        data["dropoff_latitude"],
+        data["dropoff_longitude"],
     )
 
     landmark_features = {}
@@ -135,8 +143,8 @@ def generate_features(data: dict):
     return feature_vector
 
 
-from pydantic import BaseModel
 from fastapi import HTTPException
+from pydantic import BaseModel
 
 
 class TaxiFareRequest(BaseModel):
