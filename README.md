@@ -11,6 +11,10 @@ The notebook that creates the model is here:
 
 https://github.com/refuel-code-135/ml-supervised-regression-nyc-taxi-fare
 
+## Data
+
+https://www.kaggle.com/competitions/new-york-city-taxi-fare-prediction/data
+
 
 ## Usage
 
