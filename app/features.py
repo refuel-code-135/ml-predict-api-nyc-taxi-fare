@@ -37,6 +37,14 @@ def generate_features(data: dict, pickup_kmeans, dropoff_kmeans):
     weekday = pickup_dt.weekday()
     hour = pickup_dt.hour
 
+    # Holiday flag: 1 if it's a major U.S. holiday, else 0
+    holiday_flag = int(
+        (month == 1 and pickup_dt.day == 1)  # New Year's Day
+        or (month == 7 and pickup_dt.day == 4)  # Independence Day
+        or (month == 12 and pickup_dt.day == 25)  # Christmas Day
+        or (month == 12 and pickup_dt.day == 31)  # New Year's Eve
+    )
+
     delta_lat = abs(data["pickup_latitude"] - data["dropoff_latitude"])
     delta_lon = abs(data["pickup_longitude"] - data["dropoff_longitude"])
 
@@ -111,7 +119,7 @@ def generate_features(data: dict, pickup_kmeans, dropoff_kmeans):
         landmark_features["dropoff_distance_to_Grand_Central"],
         landmark_features["pickup_distance_to_Times_Square"],
         landmark_features["dropoff_distance_to_Times_Square"],
-        0,
+        holiday_flag,
         pickup_cluster,
         dropoff_cluster,
         delta_lat,
