@@ -2,6 +2,8 @@ from datetime import datetime
 
 import numpy as np
 
+NEARBY_THRESHOLD_KM = 1.0
+
 # Coordinates of major NYC landmarks
 _landmarks = {
     "JFK": (40.6413, -73.7781),
@@ -13,12 +15,17 @@ _landmarks = {
 }
 
 
-def _compute_haversine_distance(lat1, lon1, lat2, lon2):
+def _compute_haversine_distance(from_lat, from_lon, to_lat, to_lon):
     R = 6371  # Earth radius (km)
-    lat1, lon1, lat2, lon2 = map(np.radians, [lat1, lon1, lat2, lon2])
-    dlat = lat2 - lat1
-    dlon = lon2 - lon1
-    a = np.sin(dlat / 2.0) ** 2 + np.cos(lat1) * np.cos(lat2) * np.sin(dlon / 2.0) ** 2
+    from_lat, from_lon, to_lat, to_lon = map(
+        np.radians, [from_lat, from_lon, to_lat, to_lon]
+    )
+    dlat = to_lat - from_lat
+    dlon = to_lon - from_lon
+    a = (
+        np.sin(dlat / 2.0) ** 2
+        + np.cos(from_lat) * np.cos(to_lat) * np.sin(dlon / 2.0) ** 2
+    )
     c = 2 * np.arcsin(np.sqrt(a))
     return R * c
 
@@ -33,7 +40,7 @@ def generate_features(data: dict, pickup_kmeans, dropoff_kmeans):
     delta_lat = abs(data["pickup_latitude"] - data["dropoff_latitude"])
     delta_lon = abs(data["pickup_longitude"] - data["dropoff_longitude"])
 
-    distance_km = _compute_haversine_distance(
+    straight_km = _compute_haversine_distance(
         data["pickup_latitude"],
         data["pickup_longitude"],
         data["dropoff_latitude"],
@@ -52,6 +59,13 @@ def generate_features(data: dict, pickup_kmeans, dropoff_kmeans):
         data["dropoff_longitude"],
     )
 
+    if manhattan_km != 0:
+        path_efficiency = straight_km / manhattan_km
+    else:
+        # Avoid division by zero
+        # This case is unlikely under normal conditions
+        path_efficiency = 1.0
+
     landmark_features = {}
     for name, (lat, lon) in _landmarks.items():
         landmark_features[f"pickup_distance_to_{name}"] = _compute_haversine_distance(
@@ -68,7 +82,6 @@ def generate_features(data: dict, pickup_kmeans, dropoff_kmeans):
         [[data["dropoff_latitude"], data["dropoff_longitude"]]]
     )[0]
 
-    path_efficiency = distance_km / manhattan_km if manhattan_km != 0 else 1
     pickup_vs_dropoff_to_JFK = (
         landmark_features["pickup_distance_to_JFK"]
         - landmark_features["dropoff_distance_to_JFK"]
@@ -84,7 +97,7 @@ def generate_features(data: dict, pickup_kmeans, dropoff_kmeans):
         month,
         weekday,
         hour,
-        distance_km,
+        straight_km,
         manhattan_km,
         landmark_features["pickup_distance_to_JFK"],
         landmark_features["dropoff_distance_to_JFK"],
@@ -106,8 +119,8 @@ def generate_features(data: dict, pickup_kmeans, dropoff_kmeans):
         path_efficiency,
         pickup_vs_dropoff_to_JFK,
         0,
-        int(landmark_features["pickup_distance_to_JFK"] < 1.0),
-        int(landmark_features["dropoff_distance_to_JFK"] < 1.0),
+        int(landmark_features["pickup_distance_to_JFK"] < NEARBY_THRESHOLD_KM),
+        int(landmark_features["dropoff_distance_to_JFK"] < NEARBY_THRESHOLD_KM),
     ]
 
     return feature_vector
