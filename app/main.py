@@ -49,4 +49,4 @@ def predict_fare(request: TaxiFareRequest):
         prediction = model.predict([features])[0]
         return {"predicted_fare": round(float(prediction), 2)}
     except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Error: {e}")
+        raise HTTPException(status_code=500, detail=f"Internal server error: {e}")
