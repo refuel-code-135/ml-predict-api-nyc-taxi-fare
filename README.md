@@ -51,4 +51,8 @@ curl -X POST http://localhost:9700/predict \
 http://localhost:9700/docs
 
 
+## Fixed Version
+```bash
+docker compose exec fastapi pip freeze > requirements.txt
+```
 

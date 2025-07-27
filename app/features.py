@@ -2,18 +2,8 @@ from datetime import datetime
 
 import numpy as np
 
-
-def haversine_distance(lat1, lon1, lat2, lon2):
-    R = 6371  # Earth radius (km)
-    lat1, lon1, lat2, lon2 = map(np.radians, [lat1, lon1, lat2, lon2])
-    dlat = lat2 - lat1
-    dlon = lon2 - lon1
-    a = np.sin(dlat / 2.0) ** 2 + np.cos(lat1) * np.cos(lat2) * np.sin(dlon / 2.0) ** 2
-    c = 2 * np.arcsin(np.sqrt(a))
-    return R * c
-
-
-landmarks = {
+# Coordinates of major NYC landmarks
+_landmarks = {
     "JFK": (40.6413, -73.7781),
     "LGA": (40.7769, -73.8740),
     "EWR": (40.6895, -74.1745),
@@ -21,6 +11,16 @@ landmarks = {
     "Grand_Central": (40.7527, -73.9772),
     "Times_Square": (40.7580, -73.9855),
 }
+
+
+def _compute_haversine_distance(lat1, lon1, lat2, lon2):
+    R = 6371  # Earth radius (km)
+    lat1, lon1, lat2, lon2 = map(np.radians, [lat1, lon1, lat2, lon2])
+    dlat = lat2 - lat1
+    dlon = lon2 - lon1
+    a = np.sin(dlat / 2.0) ** 2 + np.cos(lat1) * np.cos(lat2) * np.sin(dlon / 2.0) ** 2
+    c = 2 * np.arcsin(np.sqrt(a))
+    return R * c
 
 
 def generate_features(data: dict, pickup_kmeans, dropoff_kmeans):
@@ -33,19 +33,19 @@ def generate_features(data: dict, pickup_kmeans, dropoff_kmeans):
     delta_lat = abs(data["pickup_latitude"] - data["dropoff_latitude"])
     delta_lon = abs(data["pickup_longitude"] - data["dropoff_longitude"])
 
-    distance_km = haversine_distance(
+    distance_km = _compute_haversine_distance(
         data["pickup_latitude"],
         data["pickup_longitude"],
         data["dropoff_latitude"],
         data["dropoff_longitude"],
     )
 
-    manhattan_km = haversine_distance(
+    manhattan_km = _compute_haversine_distance(
         data["pickup_latitude"],
         data["pickup_longitude"],
         data["pickup_latitude"],
         data["dropoff_longitude"],
-    ) + haversine_distance(
+    ) + _compute_haversine_distance(
         data["pickup_latitude"],
         data["dropoff_longitude"],
         data["dropoff_latitude"],
@@ -53,11 +53,11 @@ def generate_features(data: dict, pickup_kmeans, dropoff_kmeans):
     )
 
     landmark_features = {}
-    for name, (lat, lon) in landmarks.items():
-        landmark_features[f"pickup_distance_to_{name}"] = haversine_distance(
+    for name, (lat, lon) in _landmarks.items():
+        landmark_features[f"pickup_distance_to_{name}"] = _compute_haversine_distance(
             data["pickup_latitude"], data["pickup_longitude"], lat, lon
         )
-        landmark_features[f"dropoff_distance_to_{name}"] = haversine_distance(
+        landmark_features[f"dropoff_distance_to_{name}"] = _compute_haversine_distance(
             data["dropoff_latitude"], data["dropoff_longitude"], lat, lon
         )
 

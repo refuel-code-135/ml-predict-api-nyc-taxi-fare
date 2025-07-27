@@ -1,8 +1,4 @@
 services:
-  fastapi:
-    build: .
-    ports:
-      - "9701:9701"
 
   nginx:
     image: nginx:alpine
@@ -12,3 +8,8 @@ services:
       - "9700:80"
     depends_on:
       - fastapi
+
+  fastapi:
+    build: .
+    ports:
+      - "9701:9701"

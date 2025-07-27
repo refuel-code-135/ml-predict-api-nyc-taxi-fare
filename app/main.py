@@ -8,6 +8,18 @@ from pydantic import BaseModel
 
 app = FastAPI()
 
+
+# Request schema
+class TaxiFareRequest(BaseModel):
+    pickup_datetime: str
+    pickup_latitude: float
+    pickup_longitude: float
+    dropoff_latitude: float
+    dropoff_longitude: float
+    passenger_count: int
+
+
+# Load model and clusters
 model = None
 pickup_kmeans = None
 dropoff_kmeans = None
@@ -26,23 +38,15 @@ def load_model_and_clusters():
     dropoff_kmeans = joblib.load(dropoff_cluster_path)
 
 
-class TaxiFareRequest(BaseModel):
-    pickup_datetime: str
-    pickup_latitude: float
-    pickup_longitude: float
-    dropoff_latitude: float
-    dropoff_longitude: float
-    passenger_count: int
-
-
+# Prediction endpoint
 @app.post("/predict")
 def predict_fare(request: TaxiFareRequest):
     if model is None:
-        raise HTTPException(status_code=500, detail="Model Loading Error")
+        raise HTTPException(status_code=500, detail="Model not loaded")
 
     try:
         features = generate_features(request.dict(), pickup_kmeans, dropoff_kmeans)
         prediction = model.predict([features])[0]
         return {"predicted_fare": round(float(prediction), 2)}
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=f"Error: {e}")
