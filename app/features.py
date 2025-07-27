@@ -4,6 +4,10 @@ import numpy as np
 
 NEARBY_THRESHOLD_KM = 1.0
 
+# pickup_cluster_avg_fare has almost no effect (SHAP ≈ 0.00006)
+# To simplify inference, it's fixed as 0.0
+pickup_cluster_avg_fare = 0.0
+
 # Coordinates of major NYC landmarks
 _landmarks = {
     "JFK": (40.6413, -73.7781),
@@ -126,7 +130,7 @@ def generate_features(data: dict, pickup_kmeans, dropoff_kmeans):
         delta_lon,
         path_efficiency,
         pickup_vs_dropoff_to_JFK,
-        0,
+        pickup_cluster_avg_fare,
         int(landmark_features["pickup_distance_to_JFK"] < NEARBY_THRESHOLD_KM),
         int(landmark_features["dropoff_distance_to_JFK"] < NEARBY_THRESHOLD_KM),
     ]
