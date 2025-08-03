@@ -5,6 +5,20 @@
 A FastAPI-based machine learning inference API that predicts New York City taxi fares based on pickup/dropoff locations, time, and passenger count.  
 The model was trained using LightGBM and deployed in a Dockerized environment with Nginx as a reverse proxy.
 
+## Request Flow
+
+```mermaid
+
+graph LR
+    Client[Client]
+    Nginx[Nginx - Port 9700]
+    FastAPI[FastAPI - Port 9701]
+
+    Client -->|HTTP Request| Nginx
+    Nginx -->|HTTP proxy| FastAPI
+
+```
+
 
 ##  Related Repository
 This API's model is created by LightGBM.  
